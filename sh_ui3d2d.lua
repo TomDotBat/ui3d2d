@@ -2,16 +2,19 @@
 ui3d2d = {}
 
 do --Input handling
+    local getRenderTarget, cursorVisible = render.GetRenderTarget, vgui.CursorVisible
+    local isMouseDown, isKeyDown = input.IsMouseDown, input.IsKeyDown
+
     local inputEnabled, isPressing, isPressed
 
     hook.Add("PreRender", "ui3d2d.inputHandler", function() --Check the input state before rendering UIs
-        if render.GetRenderTarget() then inputEnabled = false return end
-        if vgui.CursorVisible() then inputEnabled = false return end
+        if getRenderTarget() then inputEnabled = false return end
+        if cursorVisible() then inputEnabled = false return end
 
         inputEnabled = true
 
         local wasPressing = isPressing
-        isPressing = input.IsMouseDown(MOUSE_LEFT) or input.IsKeyDown(KEY_E)
+        isPressing = isMouseDown(MOUSE_LEFT) or isKeyDown(KEY_E)
         isPressed = not wasPressing and isPressing
     end)
 
@@ -32,7 +35,10 @@ do --Rendering context creation and mouse position getters
         if IsValid(localPlayer) then hook.Remove("PreRender", "ui3d2d.getLocalPlayer") end
     end)
 
+    local traceLine = util.TraceLine
+
     local baseQuery = {filter = {}}
+
     local function isObstructed(eyePos, hitPos, ignoredEntity) --Check if the cursor trace is obstructed by another ent
         local query = baseQuery
         query.start = eyePos
@@ -40,59 +46,69 @@ do --Rendering context creation and mouse position getters
         query.filter[1] = localPlayer
         query.filter[2] = ignoredEntity
 
-        return util.TraceLine(query).Hit
+        return traceLine(query).Hit
     end
 
     local mouseX, mouseY
-    local isRendering
 
-    function ui3d2d.startDraw(pos, angles, scale, ignoredEntity) --Starts a new 3d2d ui rendering context
-        if isRendering then print("[ui3d2d] Attempted to draw a new 3d2d ui without ending the previous one.") return end
+    do
+        local start3d2d = cam.Start3D2D
+        local isCursorVisible, isHoveringWorld = vgui.CursorVisible, vgui.IsHoveringWorld
+        local screenToVector, mousePos = gui.ScreenToVector, gui.MousePos
+        local intersectRayWithPlane = util.IntersectRayWithPlane
 
-        local eyePos = localPlayer:EyePos()
-        local eyePosToUi = pos - eyePos
+        local isRendering
 
-        do --Only draw the UI if the player is in front of it
-            local normal = angles:Up()
-            local dot = eyePosToUi:Dot(normal)
+        function ui3d2d.startDraw(pos, angles, scale, ignoredEntity) --Starts a new 3d2d ui rendering context
+            if isRendering then print("[ui3d2d] Attempted to draw a new 3d2d ui without ending the previous one.") return end
 
-            if dot >= 0 then return end
-        end
+            local eyePos = localPlayer:EyePos()
+            local eyePosToUi = pos - eyePos
 
-        isRendering = true
-        mouseX, mouseY = nil, nil
+            do --Only draw the UI if the player is in front of it
+                local normal = angles:Up()
+                local dot = eyePosToUi:Dot(normal)
 
-        cam.Start3D2D(pos, angles, scale)
-
-        local cursorVisible, hoveringWorld = vgui.CursorVisible(), vgui.IsHoveringWorld()
-        if not hoveringWorld and cursorVisible then return true end
-
-        local eyeNormal
-        do
-            if cursorVisible and hoveringWorld then
-                eyeNormal = gui.ScreenToVector(gui.MousePos())
-            else
-                eyeNormal = localPlayer:GetEyeTrace().Normal
+                if dot >= 0 then return end
             end
+
+            isRendering = true
+            mouseX, mouseY = nil, nil
+
+            start3d2d(pos, angles, scale)
+
+            local cursorVisible, hoveringWorld = isCursorVisible(), isHoveringWorld()
+            if not hoveringWorld and cursorVisible then return true end
+
+            local eyeNormal
+            do
+                if cursorVisible and hoveringWorld then
+                    eyeNormal = screenToVector(mousePos)
+                else
+                    eyeNormal = localPlayer:GetEyeTrace().Normal
+                end
+            end
+
+            local hitPos = intersectRayWithPlane(eyePos, eyeNormal, pos, angles:Up())
+            if not hitPos then return true end
+
+            local obstructed = isObstructed(eyePos, hitPos, ignoredEntity)
+            if obstructed then return true end
+
+            local diff = pos - hitPos
+            mouseX = diff:Dot(-angles:Forward()) / scale
+            mouseY = diff:Dot(-angles:Right()) / scale
+
+            return true
         end
 
-        local hitPos = util.IntersectRayWithPlane(eyePos, eyeNormal, pos, angles:Up())
-        if not hitPos then return true end
+        local end3d2d = cam.End3D2D
 
-        local obstructed = isObstructed(eyePos, hitPos, ignoredEntity)
-        if obstructed then return true end
-
-        local diff = pos - hitPos
-        mouseX = diff:Dot(-angles:Forward()) / scale
-        mouseY = diff:Dot(-angles:Right()) / scale
-
-        return true
-    end
-
-    function ui3d2d.endDraw() --Safely ends the 3d2d ui rendering context
-        if not isRendering then print("[ui3d2d] Attempted to end a non-existant 3d2d ui rendering context.") return end
-        isRendering = false
-        cam.End3D2D()
+        function ui3d2d.endDraw() --Safely ends the 3d2d ui rendering context
+            if not isRendering then print("[ui3d2d] Attempted to end a non-existant 3d2d ui rendering context.") return end
+            isRendering = false
+            end3d2d()
+        end
     end
 
     function ui3d2d.getCursorPos() --Returns the current 3d2d cursor position
