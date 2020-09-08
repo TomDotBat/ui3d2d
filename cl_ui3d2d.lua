@@ -1,5 +1,5 @@
 
-ui3d2d = {}
+ui3d2d = ui3d2d or {}
 
 do --Input handling
     local getRenderTarget, cursorVisible = render.GetRenderTarget, vgui.CursorVisible
@@ -83,7 +83,7 @@ do --Rendering context creation and mouse position getters
             local eyeNormal
             do
                 if cursorVisible and hoveringWorld then
-                    eyeNormal = screenToVector(mousePos)
+                    eyeNormal = screenToVector(mousePos())
                 else
                     eyeNormal = localPlayer:GetEyeTrace().Normal
                 end
@@ -119,3 +119,5 @@ do --Rendering context creation and mouse position getters
         return mx and my and mx >= x and mx <= (x + w) and my >= y and my <= (y + h)
     end
 end
+
+hook.Run("ui3d2d.fullyLoaded")
