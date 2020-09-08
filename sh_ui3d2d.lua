@@ -92,8 +92,7 @@ do --Rendering context creation and mouse position getters
             local hitPos = intersectRayWithPlane(eyePos, eyeNormal, pos, angles:Up())
             if not hitPos then return true end
 
-            local obstructed = isObstructed(eyePos, hitPos, ignoredEntity)
-            if obstructed then return true end
+            if isObstructed(eyePos, hitPos, ignoredEntity) then return true end
 
             local diff = pos - hitPos
             mouseX = diff:Dot(-angles:Forward()) / scale
