@@ -1,5 +1,5 @@
 
-ui3d2d = ui3d2d or {}
+if not ui3d2d then return end
 
 do --3d2d VGUI Drawing
     local insert = table.insert
