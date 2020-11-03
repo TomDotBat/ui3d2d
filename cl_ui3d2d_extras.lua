@@ -96,7 +96,9 @@ do --3d2d VGUI Drawing
             checkHover(panel, cursorX, cursorY)
         end
 
+        panel:SetPaintedManually(false)
         panel:PaintManual()
+        panel:SetPaintedManually(true)
 
         gui.MouseX, gui.MouseY = oldMouseX, oldMouseY
 
