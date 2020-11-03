@@ -65,7 +65,21 @@ do --3d2d VGUI Drawing
         else
             if not validChild and pointInsidePanel(panel, x, y) then
                 panel.Hovered = true
-                if panel.DoClick and ui3d2d.isPressed() then panel:DoClick() end
+
+                if panel.OnMousePressed then
+                    local key = input.IsKeyDown(KEY_LSHIFT) and MOUSE_RIGHT or MOUSE_LEFT
+
+                    if panel.OnMousePressed and ui3d2d.isPressed() then
+                        panel:OnMousePressed(key)
+                    end
+
+                    if panel.OnMouseReleased and not ui3d2d.isPressing() then
+                        panel:OnMouseReleased(key)
+                    end
+                elseif panel.DoClick and ui3d2d.isPressed() then
+                    panel:DoClick()
+                end
+
                 if panel.OnCursorEntered then panel:OnCursorEntered() end
 
                 return true
