@@ -79,7 +79,7 @@ do --3d2d VGUI Drawing
     local oldMouseX, oldMouseY = gui.MouseX, gui.MouseY
 
     function ui3d2d.drawVgui(panel, pos, angles, scale, ignoredEntity)
-        if not ui3d2d.startDraw(pos, angles, scale, ignoredEntity) then return end
+        if not (IsValid(panel) and ui3d2d.startDraw(pos, angles, scale, ignoredEntity)) then return end
 
         do
             local cursorX, cursorY = ui3d2d.getCursorPos()
