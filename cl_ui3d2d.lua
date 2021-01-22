@@ -2,31 +2,34 @@
 ui3d2d = ui3d2d or {}
 
 do --Input handling
-    local getRenderTarget, cursorVisible = render.GetRenderTarget, vgui.CursorVisible
-
-    local inputCount = 0
-
-    hook.Add("KeyPress", "ui3d2d.inputHandler", function(ply, key)
-        if key ~= IN_USE and key ~= IN_ATTACK then return end
-        inputCount = inputCount + 1
-    end)
-
-    hook.Add("KeyRelease", "ui3d2d.inputHandler", function(ply, key)
-        if key ~= IN_USE and key ~= IN_ATTACK then return end
-        inputCount = inputCount - 1
-    end)
+    local useBind = input.LookupBinding("+use", true)
+    local attackBind = input.LookupBinding("+attack", true)
 
     do
+        local lookupBinding = input.LookupBinding
+        timer.Create("ui3d2d.lookupBindings", 5, 0, function() --Keep our use and attack bind keys up to date
+            useBind = lookupBinding("+use", true)
+            attackBind = lookupBinding("+attack", true)
+        end)
+    end
+
+    do
+        local getRenderTarget, cursorVisible = render.GetRenderTarget, vgui.CursorVisible
+        local getKeyCode, isButtonDown = input.GetKeyCode, input.IsButtonDown
+
         local inputEnabled, isPressing, isPressed
 
         hook.Add("PreRender", "ui3d2d.inputHandler", function() --Check the input state before rendering UIs
             if getRenderTarget() then inputEnabled = false return end
             if cursorVisible() then inputEnabled = false return end
 
+            local useKey = useBind and getKeyCode(useBind)
+            local attackKey = attackBind and getKeyCode(attackBind)
+
             inputEnabled = true
 
             local wasPressing = isPressing
-            isPressing = inputCount > 0
+            isPressing = (useKey and isButtonDown(useKey)) or (attackKey and isButtonDown(attackKey))
             isPressed = not wasPressing and isPressing
         end)
 
