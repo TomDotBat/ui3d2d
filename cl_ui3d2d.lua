@@ -85,7 +85,7 @@ do --Rendering context creation and mouse position getters
                 local normal = angles:Up()
                 local dot = eyePosToUi:Dot(normal)
 
-                if dot >= 0 then return end
+                if dot >= 0 then return true end
             end
 
             isRendering = true
