@@ -96,7 +96,7 @@ This will return true if the cursor is currently within the bounds of the box sp
 ```lua
 ui3d2d.drawVgui(panel :: Panel, pos :: Vector, angles :: Angle, scale :: number, ignoredEntity :: Entity)
 ```
-This will draw a VGUI panel in 3D space and allow the user to interact with it. **This may not work always work as intended.**
+This will draw a VGUI panel in 3D space and allow the user to interact with it.
 - The ignoredEntity paramater is optional, this is used for disabling eyetrace collisions with the entity you're attaching your UI to.
 
 # Credits
