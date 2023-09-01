@@ -62,9 +62,8 @@ end
 do --Rendering context creation and mouse position getters
     local localPlayer
 
-    hook.Add("PreRender", "ui3d2d.getLocalPlayer", function() --Keep getting the local player until it's available
+    hook.Add("InitPostEntity", "ui3d2d.getLocalPlayer", function() --Store a reference to the local player once available
         localPlayer = LocalPlayer()
-        if IsValid(localPlayer) then hook.Remove("PreRender", "ui3d2d.getLocalPlayer") end
     end)
 
     local traceLine = util.TraceLine
