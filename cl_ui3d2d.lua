@@ -149,7 +149,7 @@ do --Rendering context creation and mouse position getters
         local end3d2d = cam.End3D2D
 
         --- Ends the UI3D2D rendering context.
-        -- This method should only be called after StartDraw() has returned true.
+        -- This method should only be called after ui3d2d.startDraw() has returned true.
         function ui3d2d.endDraw()
             if not isRendering then print("[ui3d2d] Attempted to end a non-existant 3d2d ui rendering context.") return end
             isRendering = false
