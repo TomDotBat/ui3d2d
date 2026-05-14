@@ -49,11 +49,15 @@ do --Input handling
             isPressed = not wasPressing and isPressing
         end)
 
-        function ui3d2d.isPressing() --Returns true if an input is being held
+        --- Returns true when the player holds down the use or attack key.
+        -- @return boolean True when the user is pressing on the UI.
+        function ui3d2d.isPressing()
             return inputEnabled and isPressing
         end
 
-        function ui3d2d.isPressed() --Returns true if an input was pressed this frame
+        --- Returns true if the player started pressing the UI on this frame.
+        -- @return boolean True if the player just started pressing the UI.
+        function ui3d2d.isPressed()
             return inputEnabled and isPressed
         end
     end
@@ -90,7 +94,15 @@ do --Rendering context creation and mouse position getters
 
         local isRendering
 
-        function ui3d2d.startDraw(pos, angles, scale, ignoredEntity) --Starts a new 3d2d ui rendering context
+        --- Starts a UI3D2D rendering context in immediate mode.
+        -- Calling this will also determine the user's input status for the current frame.
+        -- EndDraw() must be called after the UI has been drawn.
+        -- @param pos Vector The position to draw the UI at.
+        -- @param angles Angle The angle which the UI should face.
+        -- @param scale number The UI scale factor.
+        -- @param ignoredEntity Entity|nil The entity to ignore when calculating the cursor's position.
+        -- @return boolean True when the UI should be rendered.
+        function ui3d2d.startDraw(pos, angles, scale, ignoredEntity)
             if isRendering then print("[ui3d2d] Attempted to draw a new 3d2d ui without ending the previous one.") return end
 
             local eyePos = localPlayer:EyePos()
@@ -136,18 +148,30 @@ do --Rendering context creation and mouse position getters
 
         local end3d2d = cam.End3D2D
 
-        function ui3d2d.endDraw() --Safely ends the 3d2d ui rendering context
+        --- Ends the UI3D2D rendering context.
+        -- This method should only be called after ui3d2d.startDraw() has returned true.
+        function ui3d2d.endDraw()
             if not isRendering then print("[ui3d2d] Attempted to end a non-existant 3d2d ui rendering context.") return end
             isRendering = false
             end3d2d()
         end
     end
 
-    function ui3d2d.getCursorPos() --Returns the current 3d2d cursor position
+    --- Returns the current position of the cursor.
+    -- This will be nil when the player is not looking at the UI.
+    -- @return number|nil x The X position of the cursor.
+    -- @return number|nil y The Y position of the cursor.
+    function ui3d2d.getCursorPos()
         return mouseX, mouseY
     end
 
-    function ui3d2d.isHovering(x, y, w, h) --Returns whether the cursor is within a specified area
+    --- Determines whether or not the cursor is within the specified bounds.
+    -- @param x number The X position of the area.
+    -- @param y number The Y position of the area.
+    -- @param w number The width of the area.
+    -- @param h number The height of the area.
+    -- @return boolean True when the cursor is hovering the area.
+    function ui3d2d.isHovering(x, y, w, h)
         local mx, my = mouseX, mouseY
         return mx and my and mx >= x and mx <= (x + w) and my >= y and my <= (y + h)
     end
