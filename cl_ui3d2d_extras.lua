@@ -109,6 +109,14 @@ do --3d2d VGUI Drawing
 
     local oldMouseX, oldMouseY = gui.MouseX, gui.MouseY
 
+    --- Draws the given VGUI panel in 3D space and allows the player to interact with it.
+    -- This method is only available when the UI3D2D extras are included.
+    -- Do not call EndDraw() when using this method, it is done automatically.
+    -- @param panel Panel The VGUI panel to draw.
+    -- @param pos Vector The position to draw the UI at.
+    -- @param angles Angle The angle which the UI should face.
+    -- @param scale number The UI scale factor.
+    -- @param ignoredEntity Entity|nil The entity to ignore when calculating the cursor's position.
     function ui3d2d.drawVgui(panel, pos, angles, scale, ignoredEntity)
         if not (IsValid(panel) and ui3d2d.startDraw(pos, angles, scale, ignoredEntity)) then return end
 
